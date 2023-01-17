@@ -107,7 +107,7 @@ var capacitorPlugin = (function (exports, acquisitionSdk, filesystem, core, http
                 try {
                     const statResult = yield filesystem.Filesystem.stat({ directory, path });
                     // directory for Android, NSFileTypeDirectory for iOS
-                    return statResult.type === "directory" || statResult.type === "NSFileTypeDirectory";
+                    return statResult.type === "directory";
                 }
                 catch (error) {
                     return false;
@@ -122,7 +122,7 @@ var capacitorPlugin = (function (exports, acquisitionSdk, filesystem, core, http
                 try {
                     const statResult = yield filesystem.Filesystem.stat({ directory, path });
                     // file for Android, NSFileTypeRegular for iOS
-                    return statResult.type === "file" || statResult.type === "NSFileTypeRegular";
+                    return statResult.type === "file";
                 }
                 catch (error) {
                     return false;
@@ -169,14 +169,15 @@ var capacitorPlugin = (function (exports, acquisitionSdk, filesystem, core, http
                 if (yield FileUtil.directoryExists(destinationDir.directory, destinationDir.path)) {
                     const { files } = yield filesystem.Filesystem.readdir(sourceDir);
                     for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        if (ignoreList.includes(file))
+                        const item = files[i];
+                        const itemName = item.uri.replace(/^.*[\\\/]/, "");
+                        if (ignoreList.includes(itemName))
                             continue;
-                        const sourcePath = sourceDir.path + "/" + file;
-                        const destPath = destinationDir.path + "/" + file;
+                        const sourcePath = sourceDir.path + "/" + itemName;
+                        const destPath = destinationDir.path + "/" + itemName;
                         const source = Object.assign(Object.assign({}, sourceDir), { path: sourcePath });
                         const destination = Object.assign(Object.assign({}, destinationDir), { path: destPath });
-                        if (yield FileUtil.directoryExists(source.directory, source.path)) { // is directory
+                        if (item.type === "directory") { // is directory
                             yield FileUtil.copyDirectoryEntriesTo(source, destination);
                         }
                         else { // is file
