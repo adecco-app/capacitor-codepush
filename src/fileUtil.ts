@@ -9,7 +9,6 @@ export class FileUtil {
     public static async directoryExists(directory: Directory, path: string): Promise<boolean> {
         try {
             const statResult = await Filesystem.stat({directory, path});
-            // directory for Android, NSFileTypeDirectory for iOS
             return statResult.type === "directory";
         } catch (error) {
             return false;
@@ -23,7 +22,6 @@ export class FileUtil {
     public static async fileExists(directory: Directory, path: string): Promise<boolean> {
         try {
             const statResult = await Filesystem.stat({directory, path});
-            // file for Android, NSFileTypeRegular for iOS
             return statResult.type === "file";
         } catch (error) {
             return false;
@@ -72,15 +70,14 @@ export class FileUtil {
             const { files } = await Filesystem.readdir(sourceDir);
             for (let i = 0; i < files.length; i++) {
                 const item = files[i];
-                const itemName = item.uri.replace(/^.*[\\\/]/, "");
-                if (ignoreList.includes(itemName)) continue;
-                const sourcePath = sourceDir.path + "/" + itemName;
-                const destPath = destinationDir.path + "/" + itemName;
+                if (ignoreList.includes(item.name)) continue;
+                const sourcePath = sourceDir.path + "/" + item.name;
+                const destPath = destinationDir.path + "/" + item.name;
                 const source = { ...sourceDir, path: sourcePath };
                 const destination = { ...destinationDir, path: destPath };
-                if (item.type === "directory") { // is directory
+                if (item.type === "directory") {
                     await FileUtil.copyDirectoryEntriesTo(source, destination);
-                } else { // is file
+                } else {
                     await FileUtil.copy(source, destination);
                 }
             }

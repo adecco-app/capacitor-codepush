@@ -16,7 +16,6 @@ export class FileUtil {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const statResult = yield Filesystem.stat({ directory, path });
-                // directory for Android, NSFileTypeDirectory for iOS
                 return statResult.type === "directory";
             }
             catch (error) {
@@ -31,7 +30,6 @@ export class FileUtil {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const statResult = yield Filesystem.stat({ directory, path });
-                // file for Android, NSFileTypeRegular for iOS
                 return statResult.type === "file";
             }
             catch (error) {
@@ -80,17 +78,16 @@ export class FileUtil {
                 const { files } = yield Filesystem.readdir(sourceDir);
                 for (let i = 0; i < files.length; i++) {
                     const item = files[i];
-                    const itemName = item.uri.replace(/^.*[\\\/]/, "");
-                    if (ignoreList.includes(itemName))
+                    if (ignoreList.includes(item.name))
                         continue;
-                    const sourcePath = sourceDir.path + "/" + itemName;
-                    const destPath = destinationDir.path + "/" + itemName;
+                    const sourcePath = sourceDir.path + "/" + item.name;
+                    const destPath = destinationDir.path + "/" + item.name;
                     const source = Object.assign(Object.assign({}, sourceDir), { path: sourcePath });
                     const destination = Object.assign(Object.assign({}, destinationDir), { path: destPath });
-                    if (item.type === "directory") { // is directory
+                    if (item.type === "directory") {
                         yield FileUtil.copyDirectoryEntriesTo(source, destination);
                     }
-                    else { // is file
+                    else {
                         yield FileUtil.copy(source, destination);
                     }
                 }
