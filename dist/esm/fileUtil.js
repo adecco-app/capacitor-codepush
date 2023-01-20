@@ -16,8 +16,7 @@ export class FileUtil {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const statResult = yield Filesystem.stat({ directory, path });
-                // directory for Android, NSFileTypeDirectory for iOS
-                return statResult.type === "directory" || statResult.type === "NSFileTypeDirectory";
+                return statResult.type === "directory";
             }
             catch (error) {
                 return false;
@@ -31,8 +30,7 @@ export class FileUtil {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const statResult = yield Filesystem.stat({ directory, path });
-                // file for Android, NSFileTypeRegular for iOS
-                return statResult.type === "file" || statResult.type === "NSFileTypeRegular";
+                return statResult.type === "file";
             }
             catch (error) {
                 return false;
@@ -79,17 +77,17 @@ export class FileUtil {
             if (yield FileUtil.directoryExists(destinationDir.directory, destinationDir.path)) {
                 const { files } = yield Filesystem.readdir(sourceDir);
                 for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (ignoreList.includes(file))
+                    const item = files[i];
+                    if (ignoreList.includes(item.name))
                         continue;
-                    const sourcePath = sourceDir.path + "/" + file;
-                    const destPath = destinationDir.path + "/" + file;
+                    const sourcePath = sourceDir.path + "/" + item.name;
+                    const destPath = destinationDir.path + "/" + item.name;
                     const source = Object.assign(Object.assign({}, sourceDir), { path: sourcePath });
                     const destination = Object.assign(Object.assign({}, destinationDir), { path: destPath });
-                    if (yield FileUtil.directoryExists(source.directory, source.path)) { // is directory
+                    if (item.type === "directory") {
                         yield FileUtil.copyDirectoryEntriesTo(source, destination);
                     }
-                    else { // is file
+                    else {
                         yield FileUtil.copy(source, destination);
                     }
                 }
